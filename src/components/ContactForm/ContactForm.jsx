@@ -1,10 +1,16 @@
 import css from './ContactForm.module.css';
 
 import { Notify } from 'notiflix';
+import { ThreeDots } from 'react-loader-spinner';
 import { useDispatch, useSelector } from 'react-redux';
 import { useState } from 'react';
-import { selectContacts } from 'Redux/selectors';
+import { selectContacts, selectIsLoading } from 'Redux/selectors';
 import { addContact } from 'Redux/contactsOperations';
+import { setDeleteId } from 'Redux/deleteSlice';
+
+Notify.init({
+  position: 'center-top',
+});
 
 const initialLocalState = {
   name: '',
@@ -16,6 +22,7 @@ function ContactForm() {
 
   const dispatch = useDispatch();
   const contacts = useSelector(selectContacts);
+  const isLoading = useSelector(selectIsLoading);
 
   const handleChange = event => {
     const { name, value } = event.target;
@@ -23,7 +30,7 @@ function ContactForm() {
     setLocalState(prev => ({ ...prev, [name]: value }));
   };
 
-  const checkRepeatName = name => {
+  const repeatName = name => {
     let nameRepeat = 1;
 
     for (const contact of contacts) {
@@ -41,14 +48,15 @@ function ContactForm() {
 
     const { name, phone } = localState;
 
-    checkRepeatName(name)
-      ? dispatch(addContact({ name, phone })) &&
-        setLocalState(initialLocalState) &&
-        event.target.reset()
-      : Notify.failure(`${name}, is alredy in contacts`, {
-          position: 'center-top',
-          timeout: 5000,
-        });
+    if (!repeatName(name)) {
+      return Notify.failure(`${name}, is alredy in contacts`);
+    }
+
+    dispatch(addContact({ name, phone }));
+    dispatch(setDeleteId(''));
+    Notify.success(`${name}, added to phonebook`);
+    setLocalState(initialLocalState);
+    event.target.reset();
   };
 
   return (
@@ -84,8 +92,19 @@ function ContactForm() {
             value={localState.phone}
           />
         </label>
-        <button type="submit" className={css.button}>
-          Add contact
+        <button type="submit" className={css.button} disabled={isLoading}>
+          {isLoading ? (
+            <ThreeDots
+              height="15"
+              width="69"
+              radius="6"
+              color="#ffffff"
+              ariaLabel="three-dots-loading"
+              visible={true}
+            />
+          ) : (
+            'add contact'
+          )}
         </button>
       </form>
     </>

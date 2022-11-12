@@ -21,27 +21,32 @@ const ContactsList = () => {
   };
 
   const filteredContacts = filterContacts();
-  const checkFilteredContacts = filteredContacts.length;
+
+  if (!contacts.length) {
+    return (
+      <Notification text="You don't have contacts in the phone book. Please add new contacts." />
+    );
+  }
+
+  if (!filteredContacts.length) {
+    return (
+      <Notification
+        text={`${filter} - is not in your phone book. Please add new contact.`}
+      />
+    );
+  }
 
   return (
-    <>
-      {checkFilteredContacts ? (
-        <ul className={css.contactsList}>
-          {filteredContacts.map(contact => (
-            <ContactItem
-              key={contact.id}
-              id={contact.id}
-              name={contact.name}
-              number={contact.phone}
-            />
-          ))}
-        </ul>
-      ) : (
-        <Notification
-          text={`${filter} - is not in your phone book. Please add new contact.`}
+    <ul className={css.contactsList}>
+      {filteredContacts.map(contact => (
+        <ContactItem
+          key={contact.id}
+          id={contact.id}
+          name={contact.name}
+          number={contact.phone}
         />
-      )}
-    </>
+      ))}
+    </ul>
   );
 };
 

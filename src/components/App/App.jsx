@@ -8,15 +8,15 @@ import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { selectContacts, selectIsLoading } from 'Redux/selectors';
+import { selectIsLoading, selectError } from 'Redux/selectors';
 import { useEffect } from 'react';
 import { fetchContacts } from 'Redux/contactsOperations';
 
 function App() {
-  const contacts = useSelector(selectContacts);
   const isLoading = useSelector(selectIsLoading);
-
+  const error = useSelector(selectError);
   const dispatch = useDispatch();
+
   useEffect(() => {
     dispatch(fetchContacts());
   }, [dispatch]);
@@ -34,11 +34,8 @@ function App() {
               <Skeleton />
             </SkeletonTheme>
           )}
-          {contacts.length ? (
-            <ContactsList />
-          ) : (
-            <Notification text="You don't have contacts in the phone book. Please add new contacts." />
-          )}
+          {error && <Notification text={error} />}
+          {!error && <ContactsList />}
         </>
       </Section>
     </>

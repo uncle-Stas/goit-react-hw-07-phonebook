@@ -5,26 +5,34 @@ const initialState = {
   items: [],
   isLoading: false,
   error: null,
-};
-
-const handlePending = state => {
-  state.isLoading = true;
-};
-const handleRejected = (state, action) => {
-  state.isLoading = false;
-  state.error = action.payload;
+  isDeleting: false,
 };
 
 const contactsSlice = createSlice({
   name: 'contacts',
   initialState,
   extraReducers: {
-    [fetchContacts.pending]: handlePending,
-    [addContact.pending]: handlePending,
-    [deleteContact.pending]: handlePending,
-    [fetchContacts.rejected]: handleRejected,
-    [addContact.rejected]: handleRejected,
-    [deleteContact.rejected]: handleRejected,
+    [fetchContacts.pending]: state => {
+      state.isLoading = true;
+    },
+    [addContact.pending]: state => {
+      state.isLoading = true;
+    },
+    [deleteContact.pending]: state => {
+      state.isDeleting = true;
+    },
+    [fetchContacts.rejected]: (state, action) => {
+      state.isLoading = false;
+      state.error = action.payload;
+    },
+    [addContact.rejected]: (state, action) => {
+      state.isLoading = false;
+      state.error = action.payload;
+    },
+    [deleteContact.rejected]: (state, action) => {
+      state.isDeleting = false;
+      state.error = action.payload;
+    },
     [fetchContacts.fulfilled](state, action) {
       state.isLoading = false;
       state.error = null;
@@ -36,7 +44,7 @@ const contactsSlice = createSlice({
       state.items.push(action.payload);
     },
     [deleteContact.fulfilled](state, action) {
-      state.isLoading = false;
+      state.isDeleting = false;
       state.error = null;
       state.items = state.items.filter(
         contact => contact.id !== action.payload.id
